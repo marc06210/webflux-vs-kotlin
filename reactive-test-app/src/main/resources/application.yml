@@ -1,0 +1,10 @@
+logging:
+  level:
+    root: INFO
+    '[org.springframework.web.client.RestTemplate]': DEBUG
+
+sdfw:
+  dump-payload: true
+  ws:
+    - id: w000479.v1
+      url: https://ws-qvi-rct.airfrance.fr/it/IT_IC/000479v01
