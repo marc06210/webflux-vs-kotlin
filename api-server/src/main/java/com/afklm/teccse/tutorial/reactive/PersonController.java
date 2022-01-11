@@ -2,8 +2,8 @@ package com.afklm.teccse.tutorial.reactive;
 
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,8 +27,8 @@ public class PersonController {
     }
     
     @GetMapping("/person")
-    public List<Long> getPersonIds() {
-        return List.of(1L, 2L, 3L);
+    public Set<Long> getPersonIds() {
+        return people.keySet();
     }
 
     @GetMapping("/person/{id}")
