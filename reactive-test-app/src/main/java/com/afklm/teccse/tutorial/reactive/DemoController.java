@@ -41,46 +41,44 @@ public class DemoController {
     @GetMapping("/backend/people")
     public List<Person> getBackendPeople() {
         Instant start = Instant.now();
+        @SuppressWarnings("unchecked")
         List<Integer> ids = restTemplate.getForObject("/person", List.class);
-        List<Person> result = ids.stream().map(id -> restTemplate.getForObject("/person/{id}", Person.class, id))
+        List<Person> result = ids
+                .stream()
+                .map(id -> restTemplate.getForObject("/person/{id}", Person.class, id))
+//                .map(person -> new Person(person.id(), person.name(), restTemplate.getForObject("/person/{id}/domain", String.class, person.id())))
                 .toList();
         logTime(start);
         return result;
     }
-
+    
     @GetMapping(value = "/backend/people/reactive")
     public Flux<Person> getReactive() {
         Instant start = Instant.now();
-        
-        return webClient.get().uri("/person").retrieve().bodyToFlux(Integer.class)
-            .flatMap(id -> 
+        return webClient.get().uri("/person").retrieve().bodyToFlux(Long.class)
+            .flatMap(id ->
                 Mono.zip(
                     webClient.get().uri("/person/{id}", id).retrieve().bodyToMono(Person.class)
-                        .flatMap(person -> getSoa(person.name()).flatMap(soaresponse -> Mono.just(new Person(person.id(), soaresponse.getFirstName())))),
-                        webClient.get().uri("/person/{id}/domain", id).retrieve().bodyToMono(String.class),
-                    (person, domain) -> new Person(person.id(), person.name(), domain)
+                        .flatMap(person -> getSoa(person.name()).map(soaresponse -> new Person(id, soaresponse.getFirstName()))),
+                    webClient.get().uri("/person/{id}/domain", id).retrieve().bodyToMono(String.class),
+                    (person, domain) -> new Person(id, person.name(), domain)
                 )
             )
-            .doFinally(type -> logTime(start))
-            ;
+            .doFinally(signal -> logTime(start));
     }
 
-    @GetMapping(value = "/soa")
     public Mono<ProvideUserRightsAccessRS> getSoa(String userId) {
         ProvideUserRightsAccessRQ request = new ProvideUserRightsAccessRQ();
         request.setUserId(userId);
-        
-        return Mono.<ProvideUserRightsAccessRS>create(sink -> soaProvider.provideUserRightsAccessAsync(request, response -> {
+        return Mono.create(sink -> soaProvider.provideUserRightsAccessAsync(request, response -> {
             try {
                 sink.success(response.get());
-            } catch (InterruptedException | ExecutionException e) {
-                sink.error(e);
+            } catch (InterruptedException | ExecutionException e1) {
+                sink.error(e1);
             }
         }));
     }
-
-
-
+    
     static ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             LOGGER.info(clientRequest.url().toString());
@@ -88,13 +86,14 @@ public class DemoController {
         });
     }
 
+
     private void logTime(Instant start) {
         LOGGER.info(">>> Duration: " + Duration.between(start, Instant.now()).toMillis() + "ms");
     }
 }
 
-record Person(Integer id, String name, String domain) {
-    Person(Integer id, String name) {
+record Person(Long id, String name, String domain) {
+    Person(Long id, String name) {
         this(id, name, null);
     }
 }
