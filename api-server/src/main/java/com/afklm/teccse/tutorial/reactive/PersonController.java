@@ -3,6 +3,7 @@ package com.afklm.teccse.tutorial.reactive;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,19 +34,23 @@ public class PersonController {
     }
 
     @GetMapping("/person/{id}")
-    public Person getPerson(@PathVariable Long id, @RequestParam(name = "delay",defaultValue = "2") String delay) {
-        try {
-            Thread.sleep(Integer.parseInt(delay)*1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public Person getPerson(@PathVariable Long id, @RequestParam(name = "delay", required = false) String delay) {
+        if(delay!=null) {
+            try {
+                Thread.sleep(Integer.parseInt(delay)*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return people.get(Long.valueOf(id));
     }
 
     @GetMapping("/person/{id}/domain")
-    public Mono<String> getPersonDomains(@PathVariable Long id, @RequestParam(name = "delay",defaultValue = "2") String delay) {
-        return Mono.delay(Duration.ofSeconds(Integer.parseInt(delay)*2))
-                .thenReturn(domains.get(Long.valueOf(id)));
+    public Mono<String> getPersonDomains(@PathVariable Long id, @RequestParam(name = "delay",required = false) String delay) {
+        return Optional.ofNullable(delay)
+            .map( d -> Mono.delay(Duration.ofSeconds(Integer.parseInt(d)*2))
+                .thenReturn(domains.get(Long.valueOf(id))))
+            .orElse(Mono.just(domains.get(Long.valueOf(id))));
     }
 }
 
