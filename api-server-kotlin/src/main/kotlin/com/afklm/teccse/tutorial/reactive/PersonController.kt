@@ -3,6 +3,7 @@ package com.afklm.teccse.tutorial.reactive
 import kotlinx.coroutines.delay
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -23,14 +24,18 @@ class PersonController {
     fun getPersonIds() = people.keys
 
     @GetMapping("/person/{id}")
-    suspend fun getPerson(@PathVariable id :Integer): Person? {
-        delay(2000)
+    suspend fun getPerson(@PathVariable id :Integer, @RequestParam(name="delay", required = false) delay: String): Person? {
+        if(delay!=null) {
+            delay(delay.toLong() * 1000)
+        }
         return people.get(id.toInt())
     }
 
     @GetMapping("/person/{id}/domain")
-    suspend fun getPersonDomain(@PathVariable id :Integer): String? {
-        delay(5000)
+    suspend fun getPersonDomain(@PathVariable id :Integer, @RequestParam(name="delay", required = false) delay: String): String? {
+        if(delay!=null) {
+            delay(delay.toLong() * 2000)
+        }
         return domains.get(id.toInt())
     }
 }
