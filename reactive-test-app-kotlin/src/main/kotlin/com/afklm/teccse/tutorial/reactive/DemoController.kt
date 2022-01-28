@@ -19,10 +19,10 @@ class DemoController {
             .map { getPerson(it) }
 
     suspend fun getPerson(id :Long): Person = coroutineScope {
-        val person: Deferred<Person> = this@coroutineScope.async {
+        val person: Deferred<Person> = async {
             webClient.get().uri("/person/{id}", id).retrieve().awaitBody<Person>()
         }
-        val domain: Deferred<String> = this@coroutineScope.async {
+        val domain: Deferred<String> = async {
             webClient.get().uri("/person/{id}/domain", id).retrieve().awaitBody<String>()
         }
         Person(person.await().id, person.await().name, domain.await())
