@@ -2,13 +2,11 @@ logging:
   level:
     root: INFO
     '[org.springframework.web]': DEBUG
-    '[com.afklm.spring.security.habile]': TRACE
-
 sdfw:
-  dump-payload: true
   consumer-header:
     location: QVI
     party-id: AF
   ws:
     - id: w000479.v1
       url: https://ws-qvi-rct.airfrance.fr/it/IT_IC/000479v01
+  dump-payload: true

@@ -28,12 +28,12 @@ public class PersonController {
         domains.put(3L, "Kube");
     }
     
-    @GetMapping("/person")
+    @GetMapping("/persons")
     public Set<Long> getPersonIds() {
         return people.keySet();
     }
 
-    @GetMapping("/person/{id}")
+    @GetMapping("/persons/{id}")
     public Person getPerson(@PathVariable Long id, @RequestParam(name = "delay", required = false) String delay) {
         if(delay!=null) {
             try {
@@ -45,7 +45,7 @@ public class PersonController {
         return people.get(Long.valueOf(id));
     }
 
-    @GetMapping("/person/{id}/domain")
+    @GetMapping("/persons/{id}/domain")
     public Mono<String> getPersonDomains(@PathVariable Long id, @RequestParam(name = "delay",required = false) String delay) {
         return Optional.ofNullable(delay)
             .map( d -> Mono.delay(Duration.ofSeconds(Integer.parseInt(d)*2))
