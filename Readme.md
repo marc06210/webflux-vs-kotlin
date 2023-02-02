@@ -4,9 +4,11 @@ Project that exposes the **/persons**... endpoints
 
 ## reactive-test-app
 
-Code shown during blured presentation
+Code to demonstrate the usage of the Spring WebFlux functionalities.
 
-## kotlin
+## kotlin 
+
+The same code in kotlin for a code comparison. The database part is not covered.
 
 The kotlin samples <u>do not</u> cover the SOA part of the demo and are here only for information. 
 
