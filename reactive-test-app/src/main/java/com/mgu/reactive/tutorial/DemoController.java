@@ -1,11 +1,9 @@
 package com.mgu.reactive.tutorial;
 
-import com.mgu.reactive.tutorial.entity.ReactiveFacade;
 import com.mgu.reactive.tutorial.entity.User;
 import com.mgu.reactive.tutorial.entity.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +27,8 @@ public class DemoController {
     private static RestTemplate restTemplate = new RestTemplate();
     private static WebClient webClient = WebClient.builder().baseUrl(baseUrl).filter(logRequest()).build();
 
+    private UserRepository userRepository;
+
     static ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             LOGGER.info(clientRequest.url().toString());
@@ -36,8 +36,8 @@ public class DemoController {
         });
     }
 
-    
-    public DemoController() {
+    public DemoController(UserRepository userRepository) {
+        this.userRepository = userRepository;
         restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory(baseUrl));
     }
     
@@ -53,13 +53,6 @@ public class DemoController {
         logTime(start);
         return result;
     }
-    
-    
-    @Autowired
-    private ReactiveFacade userReactiveRepository;
-    @Autowired
-    private UserRepository userRepository;
-
 
     @GetMapping(value = "/people/ids")
     public Flux<Long> getBEIds() {
@@ -71,8 +64,9 @@ public class DemoController {
 
     @GetMapping(value="/people/{id}")
     public User getPerson(@PathVariable Long id) {
-        return userRepository.findById(id).orElse(new User(0L, "N/A"));
+        return userRepository.findById(id).orElse(new User(-1L, "N/A"));
     }
+
     @GetMapping(value = "/people/reactive")
     public Flux<Person> getBEReactive() {
         var start = Instant.now();
@@ -80,7 +74,6 @@ public class DemoController {
             .flatMap(id ->
                 Mono.zip(
                         Mono.just(userRepository.findById(id)).map(Optional::orElseThrow).map(user -> new Person(id, user.getName())),
-                        //userReactiveRepository.findById(id).map(station -> new Person(id, station.getName())),
                         webClient.get().uri("/persons/{id}/domain", id).retrieve().bodyToMono(String.class),
                         (person, domain) -> new Person(id, person.name(), domain)
                 )

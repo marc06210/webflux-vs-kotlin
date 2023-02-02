@@ -16,4 +16,3 @@ In kotlin no need to use additional framework to process asynchronous calls, it 
 
 As additional information, the addressed endpoints are **/person** (without any s).
 
-At this very moment (Feb 2022) there is no official support by TECC/SE backend on kotlin :)

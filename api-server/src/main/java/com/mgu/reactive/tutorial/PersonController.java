@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
@@ -20,9 +17,9 @@ public class PersonController {
     private Map<Long, String> domains = new HashMap<>();
 
     public PersonController() {
-        people.put(1L, new Person(1L, "m408461"));
-        people.put(2L, new Person(2L, "m312869"));
-        people.put(3L, new Person(3L, "m429347"));
+        people.put(1L, new Person(1L, "userX"));
+        people.put(2L, new Person(2L, "userY"));
+        people.put(3L, new Person(3L, "userZ"));
         domains.put(1L, "Darts");
         domains.put(2L, "Spring");
         domains.put(3L, "Kube");
@@ -35,7 +32,7 @@ public class PersonController {
 
     @GetMapping("/persons/{id}")
     public Person getPerson(@PathVariable Long id, @RequestParam(name = "delay", required = false) String delay) {
-        if(delay!=null) {
+        if (delay!=null) {
             try {
                 Thread.sleep(Integer.parseInt(delay)*1000);
             } catch (InterruptedException e) {
@@ -47,12 +44,11 @@ public class PersonController {
 
     @GetMapping("/persons/{id}/domain")
     public Mono<String> getPersonDomains(@PathVariable Long id, @RequestParam(name = "delay",required = false) String delay) {
-        return Optional.ofNullable(delay)
-            .map( d -> Mono.delay(Duration.ofSeconds(Integer.parseInt(d)*2))
-                .thenReturn(domains.get(Long.valueOf(id))))
-            .orElse(Mono.just(domains.get(Long.valueOf(id))));
+        return Optional.ofNullable (delay)
+            .map ( d -> Mono.delay (Duration.ofSeconds(Integer.parseInt(d)*2))
+                .thenReturn (domains.get (Long.valueOf(id))))
+            .orElse (Mono.just (domains.get(Long.valueOf(id))));
     }
 }
 
-record Person(Long id, String name) {
-}
+record Person(Long id, String name) { }
