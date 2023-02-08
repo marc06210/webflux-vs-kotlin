@@ -23,16 +23,28 @@ import java.util.Optional;
 public class DemoController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoController.class);
 
-    private static String baseUrl = "http://localhost:8082?delay=2";
-    private static RestTemplate restTemplate = new RestTemplate();
-    private static WebClient webClient = WebClient.builder().baseUrl(baseUrl).filter(logRequest()).build();
+    private static final String baseUrl = "http://localhost:8082?delay=2";
+    private static final RestTemplate restTemplate = new RestTemplate();
+    private static final WebClient webClient = WebClient
+            .builder()
+            .baseUrl(baseUrl)
+            .filter(logRequest())
+            .filter(logResponse())
+            .build();
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     static ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             LOGGER.info(clientRequest.url().toString());
             return Mono.just(clientRequest);
+        });
+    }
+
+    static ExchangeFilterFunction logResponse() {
+        return ExchangeFilterFunction.ofResponseProcessor(serverResponse -> {
+            LOGGER.info("MGU >>> response");
+            return Mono.just(serverResponse);
         });
     }
 
@@ -81,7 +93,6 @@ public class DemoController {
             .doFinally(signal -> logTime(start))
             ;
     }
-
     
     private void logTime(Instant start) {
         LOGGER.info(">>> Duration: " + Duration.between(start, Instant.now()).toMillis() + "ms");
