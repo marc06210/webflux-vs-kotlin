@@ -16,7 +16,7 @@ public class UserController {
     private UserRepository userRepository;
     
     @GetMapping(value = "/users")
-    public List<User> getAllStations() {
+    public List<User> getAllUsers() {
         List<User> result = new ArrayList<>();
         userRepository.findAll().forEach(result::add);
         return result;
